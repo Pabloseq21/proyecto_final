@@ -13,10 +13,10 @@ front_salir = pygame.font.SysFont("Arial", 30)
 fornt_titulo = pygame.font.SysFont("Arial", 30)
 
 #botones 
-boton_jugar = pygame.Rect (constantes.WIDTH_VENTANA/ 2 + 250, constantes.HEIGHT_VENTANA / 2 + 50, 200, 50)
-boton_opciones = pygame.Rect (constantes.WIDTH_VENTANA/ 2 + 250, constantes.HEIGHT_VENTANA / 2 + 100, 200, 50)
-boton_mapas = pygame.Rect (constantes.WIDTH_VENTANA/ 2 + 250, constantes.HEIGHT_VENTANA / 2 + 150, 200, 50)
-boton_salir = pygame.Rect (constantes.WIDTH_VENTANA/ 2 + 250, constantes.HEIGHT_VENTANA / 2 + 200, 200, 50)
+boton_jugar = pygame.Rect (constantes.WIDTH_VENTANA/ 2 + 200, constantes.HEIGHT_VENTANA / 2 + 50, 200, 50)
+boton_opciones = pygame.Rect (constantes.WIDTH_VENTANA// 2 + 200, constantes.HEIGHT_VENTANA // 2 + 150, 200, 50)
+boton_mapas = pygame.Rect (constantes.WIDTH_VENTANA/ 2 + 200, constantes.HEIGHT_VENTANA / 2 + 250, 200, 50)
+boton_salir = pygame.Rect (constantes.WIDTH_VENTANA/ 2 + 200, constantes.HEIGHT_VENTANA / 2 + 350, 200, 50)
 
 
 def color_bot(button_rect):                               #funcion para los botones cuando se pasa por ensima del mouse cambian de color 
@@ -34,10 +34,6 @@ def dibujar_boton(texto, button_rect):
     text_surface = front_inicio.render(texto, True, constantes.BLANCO)
     text_rect = text_surface.get_rect(center=button_rect.center)
     vent.blit(text_surface, text_rect)
-
-# pantalla de inicio 
-
-    
     
 #codigo para que el se mantenga avierto hasta que el usuario quiera salirse 
 run = True 
