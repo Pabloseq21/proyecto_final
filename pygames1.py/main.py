@@ -1,16 +1,47 @@
 import pygame
 import firebase_admin
 from firebase_admin import credentials, db
+import firebase_admin.auth as auth
 from moviepy import VideoFileClip  # Para reproducir el video
 import constantes  # Importar constantes desde el otro archivo
 
 pygame.init()  # Iniciar pygame
 
 # Inicializar Firebase
-cred = credentials.Certificate(r"testpython-673c0-firebase-adminsdk-b93r7-bd9607d785.json")  # Reemplaza con la ruta de tu archivo JSON
+cred = credentials.Certificate(r"testpython-673c0-firebase-adminsdk-b93r7-186801a580.json")  # Reemplaza con la ruta de tu archivo JSON
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://testpython-673c0-default-rtdb.firebaseio.com/'
 })
+
+vent = pygame.display.set_mode((constantes.WIDTH, constantes.HEIGHT))
+pygame.display.set_caption("Pac-man")
+
+# Fuentes
+front_inicio = pygame.font.SysFont("Minecraft", 30)
+
+
+
+
+def menu_principal():
+    fondo_imagen = pygame.image.load(r"C:\Users\Estudiante\Desktop\pygames1.py\P U C K.jpg")
+    fondo_imagen = pygame.transform.scale(fondo_imagen, (constantes.WIDTH, constantes.HEIGHT))
+    
+    boton_start = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 - 100, 200, 50)
+    
+    run = True
+    while run:
+        vent.blit(fondo_imagen, (0, 0))
+        
+        dibujar_boton("START", boton_start.centerx, boton_start.centery, front_inicio)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if boton_start.collidepoint(event.pos):
+                    ventana_inicio_sesion()  # Ir a la ventana de inicio de sesión
+
+        pygame.display.flip()
 
 def obtener_puntajes():
     try:
@@ -208,7 +239,7 @@ def ventana_online():
         pygame.display.flip()  # Actualizar la ventana
 
 def menu_principal():
-    fondo_imagen = pygame.image.load(r"C:\Users\user\Downloads\P U C K.jpg")  # Cambia esta ruta por la imagen que desees
+    fondo_imagen = pygame.image.load(r"C:\Users\Estudiante\Desktop\pygames1.py\P U C K.jpg")  # Cambia esta ruta por la imagen que desees
     fondo_imagen = pygame.transform.scale(fondo_imagen, (constantes.WIDTH, constantes.HEIGHT))  # Escalar la imagen al tamaño de la ventana
 
     boton_play = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 - 100, 200, 50)
@@ -240,10 +271,92 @@ def menu_principal():
                     run = False  # Cerrar el menú principal
 
         pygame.display.flip()  # Actualizar la ventana
+# Nueva ventana que se abre después de seleccionar "I´m online"
+def ventana_online():
+    run = True
+    while run:
+        vent.fill((0, 0, 0))  # Fondo negro
+
+        # Mostrar el mensaje
+        mensaje = front_inicio.render("REMEMBER, u have to be online to save your progress", True, (255, 255, 255))
+        vent.blit(mensaje, (constantes.WIDTH / 2 - mensaje.get_width() / 2, constantes.HEIGHT / 3))
+
+        # Botones para "I'm Online" y "Exit"
+        boton_online = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 - 50, 200, 50)
+        boton_exit = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 + 50, 200, 50)
+
+        dibujar_boton("I'm Online", boton_online.centerx, boton_online.centery, front_inicio)
+        dibujar_boton("Exit", boton_exit.centerx, boton_exit.centery, front_inicio)
+
+        # Manejo de eventos
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if boton_online.collidepoint(event.pos):
+                    print("El jugador está online.")
+                    run = False  # Cerrar la ventana emergente y continuar con el juego
+                    ventana_online_opciones()  # Mostrar las opciones "Match" y "Story Mode"
+                elif boton_exit.collidepoint(event.pos):
+                    print("Volviendo al menú principal...")
+                    menu_principal()  # Regresar al menú principal
+                    run = False
+
+        pygame.display.flip()  # Actualizar la ventana
+
+def juego_pacman():
+    
+    run = True
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+
+   
+        vent.fill((0, 0, 0))  # Fondo negro
+
+       
+        pygame.draw.circle(vent, (255, 255, 0), (constantes.WIDTH // 2, constantes.HEIGHT // 2), 20)  # Pac-Man (amarillo)
+
+        pygame.display.flip()  # Actualizar la pantalla
+        pygame.time.Clock().tick(60)  # Limitar FPS (30 FPS por ejemplo)
+
+    pygame.quit()  # Salir del juego
+# Nueva ventana que muestra las opciones "Match" y "Story Mode"
+def ventana_online_opciones():
+    run = True
+    while run:
+        vent.fill((0, 0, 0))  # Fondo negro
+
+        # Mostrar el título de la ventana de opciones
+        mensaje = front_inicio.render("Choose an Option", True, (255, 255, 255))
+        vent.blit(mensaje, (constantes.WIDTH / 2 - mensaje.get_width() / 2, 50))
+
+        # Botones para "Match" y "Story Mode"
+        boton_match = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 - 50, 200, 50)
+        boton_story_mode = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 + 50, 200, 50)
+
+        dibujar_boton("Match", boton_match.centerx, boton_match.centery, front_inicio)
+        dibujar_boton("Story Mode", boton_story_mode.centerx, boton_story_mode.centery, front_inicio)
+
+        # Manejo de eventos
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if boton_match.collidepoint(event.pos):
+                    print("Iniciando juego de Pac-Man...")
+                    run = False  # Cerrar la ventana de opciones
+                    juego_pacman()  # Llamar la función que contiene el juego Pac-Man
+                elif boton_story_mode.collidepoint(event.pos):
+                    print("Iniciar el modo historia...")  # Aquí deberías agregar la lógica de modo historia si la tienes
+                    run = False
+
+        pygame.display.flip()  # Actualizar la ventana
 
 # Función para la ventana de opciones (START y EXIT)
 def opciones():
-    fondo_imagen = pygame.image.load(r"C:\Users\user\Downloads\P U C K (2).jpg")  # Cambia esta ruta por la imagen que desees
+    fondo_imagen = pygame.image.load(r"C:\Users\Estudiante\Desktop\pygames1.py\P U C K (2).jpg")  # Cambia esta ruta por la imagen que desees
     fondo_imagen = pygame.transform.scale(fondo_imagen, (constantes.WIDTH, constantes.HEIGHT))  # Escalar la imagen al tamaño de la ventana
 
     run = True
@@ -270,7 +383,7 @@ def opciones():
 # Ventana con opciones (START y EXIT)
 def opciones():
     # Cargar imagen de fondo
-    fondo_imagen = pygame.image.load(r"C:\Users\user\Downloads\P U C K (2).jpg")  # Cambia esta ruta por la imagen que desees
+    fondo_imagen = pygame.image.load(r"C:\Users\Estudiante\Desktop\pygames1.py\P U C K (2).jpg")  # Cambia esta ruta por la imagen que desees
     fondo_imagen = pygame.transform.scale(fondo_imagen, (constantes.WIDTH, constantes.HEIGHT))  # Escalar la imagen al tamaño de la ventana
 
     run = True
@@ -297,10 +410,11 @@ def opciones():
 # Código principal del juego
 if __name__ == "__main__":
     # Reproducir el video de introducción antes de mostrar el menú
-    play_intro_video(r"C:\Users\user\Videos\0216(1).mp4")  # Cambia esta ruta por la correcta de tu video
+    play_intro_video(r"C:\Users\Estudiante\Desktop\pygames1.py\0216(1).mp4")  # Cambia esta ruta por la correcta de tu video
     
     # Mostrar la ventana de opciones después del video
     opciones()
 
     # Aquí iría el resto del código del juego si elige "PLAY"
     pygame.quit()
+
