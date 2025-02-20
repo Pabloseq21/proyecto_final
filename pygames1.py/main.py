@@ -9,16 +9,13 @@ from pacmancode import pacmancode
 pygame.init()  # Iniciar pygame
 
 # Inicializar Firebase
-cred = credentials.Certificate(r"testpython-673c0-firebase-adminsdk-b93r7-cc7928a2dc.json")  # Reemplaza con la ruta de tu archivo JSON
+cred = credentials.Certificate(r"testpython-673c0-firebase-adminsdk-b93r7-bd9607d785.json")  # Reemplaza con la ruta de tu archivo JSON
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://testpython-673c0-default-rtdb.firebaseio.com/'
 })
 
 vent = pygame.display.set_mode((constantes.WIDTH, constantes.HEIGHT))
 pygame.display.set_caption("Pac-man")
-
-# Fuentes
-front_inicio = pygame.font.SysFont("Minecraft", 30)
 
 
 
@@ -55,8 +52,6 @@ def obtener_puntajes():
 vent = pygame.display.set_mode((constantes.WIDTH, constantes.HEIGHT))  # Crear una ventana con las medidas del archivo de constantes
 pygame.display.set_caption("Pac-man")  # Nombre de la ventana
 
-# Fuentes
-front_inicio = pygame.font.SysFont("Minecraft", 30)
 
 # Botones
 boton_start = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 - 50, 200, 50)
@@ -145,7 +140,7 @@ def obtener_top_scores():
         y_offset = 150  # Inicialización para la posición Y de los puntajes
         for user in sorted_users:
             score_text = f"{user['display_name']}: {user['Puntuación']}"  # Mostrar el nombre del jugador y su puntaje
-            text_surface = front_inicio.render(score_text, True, (255, 255, 255))
+            text_surface = constantes.front_inicio.render(score_text, True, (255, 255, 255))
             vent.blit(text_surface, (constantes.WIDTH // 2 - text_surface.get_width() // 2, y_offset))
             y_offset += 40  # Espaciado entre cada puntaje
 
@@ -162,20 +157,20 @@ def ventana_top_scores():
         vent.fill((0, 0, 0))  # Fondo negro
 
         # Título de la ventana
-        mostrar_titulo = front_inicio.render("Top Scores", True, (255, 255, 255))
+        mostrar_titulo = constantes.front_inicio.render("Top Scores", True, (255, 255, 255))
         vent.blit(mostrar_titulo, (constantes.WIDTH / 2 - mostrar_titulo.get_width() / 2, 50))
 
         # Mostrar los puntajes
         y_offset = 150  # Para comenzar a dibujar las puntuaciones desde una posición vertical
         for display_name, score in puntajes:
             texto = f"{display_name}: {score}"
-            texto_score = front_inicio.render(texto, True, (255, 255, 255))
+            texto_score = constantes.front_inicio.render(texto, True, (255, 255, 255))
             vent.blit(texto_score, (constantes.WIDTH / 2 - texto_score.get_width() / 2, y_offset))
             y_offset += 40  # Separar cada línea de puntajes
 
         # Botón para salir de la ventana de puntajes y volver al menú principal
         boton_exit = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT - 100, 200, 50)
-        dibujar_boton("EXIT", boton_exit.centerx, boton_exit.centery, front_inicio)
+        dibujar_boton("EXIT", boton_exit.centerx, boton_exit.centery, constantes.front_inicio)
 
         # Manejo de eventos
         for event in pygame.event.get():
@@ -194,15 +189,15 @@ def ventana_online():
         vent.fill((0, 0, 0))  # Fondo negro
 
         # Mostrar el mensaje
-        mensaje = front_inicio.render("REMEMBER, u have to be online to save your progress", True, (255, 255, 255))
+        mensaje = constantes.front_inicio.render("REMEMBER, u have to be online to save your progress", True, (255, 255, 255))
         vent.blit(mensaje, (constantes.WIDTH / 2 - mensaje.get_width() / 2, constantes.HEIGHT / 3))
 
         # Botones para "I'm Online" y "Exit"
         boton_online = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 - 50, 200, 50)
         boton_exit = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 + 50, 200, 50)
 
-        dibujar_boton("I'm Online", boton_online.centerx, boton_online.centery, front_inicio)
-        dibujar_boton("Exit", boton_exit.centerx, boton_exit.centery, front_inicio)
+        dibujar_boton("I'm Online", boton_online.centerx, boton_online.centery, constantes.front_inicio)
+        dibujar_boton("Exit", boton_exit.centerx, boton_exit.centery, constantes.front_inicio)
 
         # Manejo de eventos
         for event in pygame.event.get():
@@ -231,9 +226,9 @@ def menu_principal():
     while run:
         vent.blit(fondo_imagen, (0, 0))  # Dibujar la imagen de fondo sobre la ventana
 
-        dibujar_boton("PLAY", boton_play.centerx, boton_play.centery, front_inicio)  # Botón PLAY
-        dibujar_boton("TOP SCORES", boton_top_scores.centerx, boton_top_scores.centery, front_inicio)  # Botón TOP SCORES
-        dibujar_boton("EXIT", boton_exit.centerx, boton_exit.centery, front_inicio)  # Botón EXIT
+        dibujar_boton("PLAY", boton_play.centerx, boton_play.centery, constantes.front_inicio)  # Botón PLAY
+        dibujar_boton("TOP SCORES", boton_top_scores.centerx, boton_top_scores.centery, constantes.front_inicio)  # Botón TOP SCORES
+        dibujar_boton("EXIT", boton_exit.centerx, boton_exit.centery, constantes.front_inicio)  # Botón EXIT
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -259,15 +254,15 @@ def ventana_online():
         vent.fill((0, 0, 0))  # Fondo negro
 
         # Mostrar el mensaje
-        mensaje = front_inicio.render("REMEMBER, u have to be online to save your progress", True, (255, 255, 255))
+        mensaje = constantes.front_inicio.render("REMEMBER, u have to be online to save your progress", True, (255, 255, 255))
         vent.blit(mensaje, (constantes.WIDTH / 2 - mensaje.get_width() / 2, constantes.HEIGHT / 3))
 
         # Botones para "I'm Online" y "Exit"
         boton_online = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 - 50, 200, 50)
         boton_exit = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 + 50, 200, 50)
 
-        dibujar_boton("I'm Online", boton_online.centerx, boton_online.centery, front_inicio)
-        dibujar_boton("Exit", boton_exit.centerx, boton_exit.centery, front_inicio)
+        dibujar_boton("I'm Online", boton_online.centerx, boton_online.centery, constantes.front_inicio)
+        dibujar_boton("Exit", boton_exit.centerx, boton_exit.centery, constantes.front_inicio)
 
         # Manejo de eventos
         for event in pygame.event.get():
@@ -292,15 +287,15 @@ def ventana_online_opciones():
         vent.fill((0, 0, 0))  # Fondo negro
 
         # Mostrar el título de la ventana de opciones
-        mensaje = front_inicio.render("Choose an Option", True, (255, 255, 255))
+        mensaje = constantes.front_inicio.render("Choose an Option", True, (255, 255, 255))
         vent.blit(mensaje, (constantes.WIDTH / 2 - mensaje.get_width() / 2, 50))
 
         # Botones para "Match" y "Story Mode"
         boton_match = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 - 50, 200, 50)
         boton_story_mode = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 + 50, 200, 50)
 
-        dibujar_boton("Match", boton_match.centerx, boton_match.centery, front_inicio)
-        dibujar_boton("Story Mode", boton_story_mode.centerx, boton_story_mode.centery, front_inicio)
+        dibujar_boton("Match", boton_match.centerx, boton_match.centery, constantes.front_inicio)
+        dibujar_boton("Story Mode", boton_story_mode.centerx, boton_story_mode.centery, constantes.front_inicio)
 
         # Manejo de eventos
         for event in pygame.event.get():
@@ -326,8 +321,8 @@ def opciones():
     while run:
         vent.blit(fondo_imagen, (0, 0))  # Dibujar la imagen de fondo
 
-        dibujar_boton("START", boton_start.centerx, boton_start.centery, front_inicio)  # Botón START
-        dibujar_boton("EXIT", boton_exit.centerx, boton_exit.centery, front_inicio)    # Botón EXIT
+        dibujar_boton("START", boton_start.centerx, boton_start.centery, constantes.front_inicio)  # Botón START
+        dibujar_boton("EXIT", boton_exit.centerx, boton_exit.centery, constantes.front_inicio)    # Botón EXIT
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -353,8 +348,8 @@ def opciones():
     while run:
         vent.blit(fondo_imagen, (0, 0))  # Dibujar la imagen de fondo
 
-        dibujar_boton("START", boton_start.centerx, boton_start.centery, front_inicio)  # Botón START
-        dibujar_boton("EXIT", boton_exit.centerx, boton_exit.centery, front_inicio)    # Botón EXIT
+        dibujar_boton("START", boton_start.centerx, boton_start.centery, constantes.front_inicio)  # Botón START
+        dibujar_boton("EXIT", boton_exit.centerx, boton_exit.centery, constantes.front_inicio)    # Botón EXIT
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
