@@ -9,7 +9,7 @@ from pacmancode import pacmancode
 pygame.init()  # Iniciar pygame
 
 # Inicializar Firebase
-cred = credentials.Certificate(r"testpython-673c0-firebase-adminsdk-fbsvc-44c59768dc.json")  # Reemplaza con la ruta de tu archivo JSON
+cred = credentials.Certificate(r"pygames1.py/testpython-673c0-firebase-adminsdk-fbsvc-cfdb9b6a07.json")  # Reemplaza con la ruta de tu archivo JSON
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://testpython-673c0-default-rtdb.firebaseio.com/'
 })
@@ -215,7 +215,7 @@ def ventana_online():
         pygame.display.flip()  # Actualizar la ventana
 
 def menu_principal():
-    fondo_imagen = pygame.image.load(r"C:\Users\user\Downloads\P U C K.jpg")  # Cambia esta ruta por la imagen que desees
+    fondo_imagen = pygame.image.load(r"pygames1.py/P U C K.jpg")  # Cambia esta ruta por la imagen que desees
     fondo_imagen = pygame.transform.scale(fondo_imagen, (constantes.WIDTH, constantes.HEIGHT))  # Escalar la imagen al tamaño de la ventana
 
     boton_play = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 - 100, 200, 50)
@@ -459,7 +459,7 @@ def login():
 
 # Función para la ventana de opciones (START y EXIT)
 def opciones():
-    fondo_imagen = pygame.image.load(r"C:\Users\user\Downloads\P U C K (2).jpg")  # Cambia esta ruta por la imagen que desees
+    fondo_imagen = pygame.image.load(r"pygames1.py/P U C K (2).jpg")  # Cambia esta ruta por la imagen que desees
     fondo_imagen = pygame.transform.scale(fondo_imagen, (constantes.WIDTH, constantes.HEIGHT))  # Escalar la imagen al tamaño de la ventana
 
     run = True
@@ -487,7 +487,7 @@ def opciones():
 # Código principal del juego
 if __name__ == "__main__":
     # Reproducir el video de introducción antes de mostrar el menú
-    play_intro_video(r"C:\Users\user\Videos\0216(1).mp4")  # Cambia esta ruta por la correcta de tu video
+    play_intro_video(r"pygames1.py/0216(1).mp4")  # Cambia esta ruta por la correcta de tu video
     
     # Mostrar la ventana de opciones después del video
     opciones()
