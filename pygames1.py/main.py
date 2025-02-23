@@ -5,11 +5,11 @@ import firebase_admin.auth as auth
 from moviepy import VideoFileClip  # Para reproducir el video
 import constantes  # Importar constantes desde el otro archivo
 from pacmancode import pacmancode
-  
+
 pygame.init()  # Iniciar pygame
 
 # Inicializar Firebase
-cred = credentials.Certificate(r"testpython-673c0-firebase-adminsdk-b93r7-bd9607d785.json")  # Reemplaza con la ruta de tu archivo JSON
+cred = credentials.Certificate(r"testpython-673c0-firebase-adminsdk-fbsvc-44c59768dc.json")  # Reemplaza con la ruta de tu archivo JSON
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://testpython-673c0-default-rtdb.firebaseio.com/'
 })
@@ -311,6 +311,151 @@ def ventana_online_opciones():
                     run = False
 
         pygame.display.flip()  # Actualizar la ventana
+# Variables globales para la entrada del usuario
+def login():
+    pygame.init()
+
+    screen = pygame.display.set_mode((800, 600))
+    pygame.display.set_caption("Login")
+
+    font = pygame.font.Font(None, 36)
+
+    email_input = ""
+    password_input = ""
+    name_input = ""
+    active_input = None
+    error_message = ""
+    show_register_button = False
+    requesting_name = False  
+
+    # Función para autenticar al usuario
+    def authenticate_user(email, password):
+        nonlocal error_message, show_register_button
+        ref = db.reference("users").get()
+        if ref:
+            for user_id, user_data in ref.items():
+                if user_data.get("email") == email:
+                    if user_data.get("password") == password:
+                        error_message = "✅ Sign in successful!"
+                        show_register_button = False
+                        pygame.time.delay(1000)
+                        menu_principal()  # Ir al menú principal
+                        return True  
+                    else:
+                        error_message = "❌ Incorrect password."
+                        return False
+
+        error_message = "❌ Email not found in database."
+        show_register_button = True
+        return False
+
+    # Función para registrar un nuevo usuario
+    def register_user(email, password, name):
+        nonlocal error_message, show_register_button
+        ref = db.reference("users")
+        new_user_ref = ref.push()
+        new_user_ref.set({
+            "email": email,
+            "password": password,
+            "display_name": name,
+            "score": 0
+        })
+        error_message = "✅ Sign up successful!"
+        show_register_button = False
+        pygame.time.delay(1000)
+        menu_principal()  # Ir al menú principal
+        return True  
+
+    running = True
+    while running:
+        screen.fill((0, 0, 0))  # Fondo negro
+
+        title = font.render("Inicio de Sesión", True, (255, 255, 255))
+        screen.blit(title, (300, 50))
+
+        email_label = font.render("Email:", True, (255, 255, 255))
+        password_label = font.render("Password:", True, (255, 255, 255))
+        screen.blit(email_label, (200, 150))
+        screen.blit(password_label, (200, 250))
+
+        # Campos de entrada
+        email_rect = pygame.Rect(350, 145, 300, 40)
+        password_rect = pygame.Rect(350, 245, 300, 40)
+        pygame.draw.rect(screen, (150, 150, 150), email_rect)
+        pygame.draw.rect(screen, (150, 150, 150), password_rect)
+
+        email_text = font.render(email_input, True, (0, 0, 0))
+        password_text = font.render("*" * len(password_input), True, (0, 0, 0))
+        screen.blit(email_text, (email_rect.x + 10, email_rect.y + 5))
+        screen.blit(password_text, (password_rect.x + 10, password_rect.y + 5))
+
+        # Botón de login
+        login_rect = pygame.Rect(350, 350, 120, 50)
+        pygame.draw.rect(screen, (0, 0, 255), login_rect)
+        login_text = font.render("Login", True, (255, 255, 255))
+        screen.blit(login_text, (login_rect.x + 20, login_rect.y + 10))
+
+        # Botón de registro
+        register_rect = pygame.Rect(500, 350, 120, 50)
+        if show_register_button:
+            pygame.draw.rect(screen, (0, 255, 0), register_rect)
+            register_text = font.render("Sign Up", True, (255, 255, 255))
+            screen.blit(register_text, (register_rect.x + 10, register_rect.y + 10))
+
+        if requesting_name:
+            name_label = font.render("Name:", True, (255, 255, 255))
+            screen.blit(name_label, (200, 300))
+            name_rect = pygame.Rect(350, 295, 300, 40)
+            pygame.draw.rect(screen, (150, 150, 150), name_rect)
+            name_text = font.render(name_input, True, (0, 0, 0))
+            screen.blit(name_text, (name_rect.x + 10, name_rect.y + 5))
+
+        # Mensaje de error
+        if error_message:
+            error_color = (255, 0, 0) if "❌" in error_message else (0, 255, 0)
+            error_text = font.render(error_message, True, error_color)
+            screen.blit(error_text, (350, 420))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if email_rect.collidepoint(event.pos):
+                    active_input = "email"
+                elif password_rect.collidepoint(event.pos):
+                    active_input = "password"
+                elif requesting_name and name_rect.collidepoint(event.pos):
+                    active_input = "name"
+                elif login_rect.collidepoint(event.pos):
+                    if authenticate_user(email_input, password_input):
+                        return  # Si el login es exitoso, salimos de la función
+                elif show_register_button and register_rect.collidepoint(event.pos):
+                    requesting_name = True  
+
+            if event.type == pygame.KEYDOWN:
+                if active_input == "email":
+                    if event.key == pygame.K_BACKSPACE:
+                        email_input = email_input[:-1]
+                    else:
+                        email_input += event.unicode
+                elif active_input == "password":
+                    if event.key == pygame.K_BACKSPACE:
+                        password_input = password_input[:-1]
+                    else:
+                        password_input += event.unicode
+                elif active_input == "name":
+                    if event.key == pygame.K_BACKSPACE:
+                        name_input = name_input[:-1]
+                    else:
+                        name_input += event.unicode
+                    if event.key == pygame.K_RETURN and name_input:
+                        if register_user(email_input, password_input, name_input):
+                            return  # Si el registro es exitoso, salimos de la función
+
+        pygame.display.flip()
+
+    pygame.quit()
 
 # Función para la ventana de opciones (START y EXIT)
 def opciones():
@@ -331,39 +476,13 @@ def opciones():
                 if boton_start.collidepoint(event.pos):
                     print("Iniciar juego...")
                     run = False  # Cerrar la ventana de opciones y abrir el menú
-                    menu_principal()  # Abrir el menú principal después de presionar "START"
+                    login()  # Abrir el menú principal después de presionar "START"
                 elif boton_exit.collidepoint(event.pos):
                     pygame.quit()  # Salir del juego
                     run = False
 
         pygame.display.flip()  # Actualizar la ventana
 
-# Ventana con opciones (START y EXIT)
-def opciones():
-    # Cargar imagen de fondo
-    fondo_imagen = pygame.image.load(r"C:\Users\user\Downloads\P U C K (2).jpg")  # Cambia esta ruta por la imagen que desees
-    fondo_imagen = pygame.transform.scale(fondo_imagen, (constantes.WIDTH, constantes.HEIGHT))  # Escalar la imagen al tamaño de la ventana
-
-    run = True
-    while run:
-        vent.blit(fondo_imagen, (0, 0))  # Dibujar la imagen de fondo
-
-        dibujar_boton("START", boton_start.centerx, boton_start.centery, constantes.front_inicio)  # Botón START
-        dibujar_boton("EXIT", boton_exit.centerx, boton_exit.centery, constantes.front_inicio)    # Botón EXIT
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if boton_start.collidepoint(event.pos):
-                    print("Iniciar juego...")
-                    run = False  # Cerrar la ventana de opciones y abrir el menú
-                    menu_principal()  # Abrir el menú principal después de presionar "START"
-                elif boton_exit.collidepoint(event.pos):
-                    pygame.quit()  # Salir del juego
-                    run = False
-
-        pygame.display.flip()  # Actualizar la ventana
 
 # Código principal del juego
 if __name__ == "__main__":
@@ -375,3 +494,5 @@ if __name__ == "__main__":
 
     # Aquí iría el resto del código del juego si elige "PLAY"
     pygame.quit()
+
+
