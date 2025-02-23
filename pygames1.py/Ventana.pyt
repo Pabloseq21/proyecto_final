@@ -1,139 +1,165 @@
 import pygame
 import firebase_admin
 from firebase_admin import credentials, db
-import firebase_admin.auth as auth
-import constantes  # Importar constantes desde el otro archivo
+from MAIN import menu_principal 
 
-# Inicializa Firebase
-cred = credentials.Certificate("testpython-673c0-firebase-adminsdk-b93r7-bd9607d785.json")
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://testpython-673c0-default-rtdb.firebaseio.com/'
-})
-
-# Inicializa Pygame
+try:
+    firebase_admin.get_app()  # Verifica si Firebase ya está inicializado
+except ValueError:
+    cred = credentials.Certificate("testpython-673c0-firebase-adminsdk-fbsvc-44c59768dc.json")
+    firebase_admin.initialize_app(cred, {"databaseURL": "https://testpython-673c0-default-rtdb.firebaseio.com/"})
+# Inicializar pygame
 pygame.init()
 
 # Configuración de la ventana
-screen = pygame.display.set_mode((300, 400))
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Inicio de Sesión")
 
 # Colores
-ACTIVE_COLOR = (constantes.GRIS)  # Color cuando el campo está activo
-INACTIVE_COLOR = (constantes.BLANCO)  # Color cuando el campo no está activo
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GRAY = (200, 200, 200)
+BLUE = (50, 150, 255)
+GREEN = (0, 200, 0)
+RED = (255, 0, 0)
 
 # Fuentes
-font = constantes.front_inicio
+front_inicio = pygame.font.Font("Font/Minecraft.ttf", 30)
+small_font = pygame.font.Font(None, 30)
 
-# Variables de estado
-text_nombre = ""
-text_contraseña = ""
-active_input = None  # None, 'nombre', or 'contrañesa'
 
-# Funciones para manejar el inicio de sesión y registro
-def login(nombre, contraseña):
-    ref = db.reference('users')
-    usuarios = ref.get()
 
-    for usuario_id, usuario_data in usuarios.items():
-        if usuario_data['display_name'] == nombre and usuario_data['contraseña'] == contraseña:
-            print(f"Inicio de sesión exitoso para: {nombre}")
-            return True
+def login():
+    email_input = ""
+    password_input = ""
+    name_input = ""
+    active_input = None
+    error_message = ""
+    show_register_button = False
+    requesting_name = False  
 
-    print("Error en el inicio de sesión: Credenciales incorrectas")
-    return False
+    def authenticate_user(email, password):
+        nonlocal error_message, show_register_button
+        ref = db.reference("users").get()
+        if ref:
+            for user_id, user_data in ref.items():
+                if user_data.get("email") == email:
+                    if user_data.get("password") == password:
+                        error_message = "✅ Sign in successful!"
+                        show_register_button = False
+                        pygame.time.delay(1000)
+                        return True  
+                    else:
+                        error_message = "❌ Incorrect password."
+                        return False
 
-def register(email, nombre, contraseña):
+        error_message = "❌ We don't found an email in our database."
+        show_register_button = True
+        return False
 
-    ref = db.reference('users')
-    usuarios = ref.get()
+    def register_user(email, password, name):
+        nonlocal error_message, show_register_button
+        ref = db.reference("users")
+        new_user_ref = ref.push()
+        new_user_ref.set({
+            "email": email,
+            "password": password,
+            "display_name": name,
+            "score": 0
+        })
+        error_message = "✅ Sign up successful!"
+        show_register_button = False
+        pygame.time.delay(1000)
+        return True  
 
-    for usuario_id, usuario_data in usuarios.items():
+    running = True
+    while running:
+        screen.fill(BLACK)
 
-        #Verificar si ya existe un usuario con ese nombre o correo
+        title = front_inicio.render("Inicio de Sesión", True, WHITE)
+        screen.blit(title, (WIDTH // 2 - title.get_width() // 2, 50))
 
-        if usuario_data['display_name'] == nombre or usuario_data['email'] == email:
+        email_label = front_inicio.render("Email:", True, WHITE)
+        password_label = front_inicio.render("Password:", True, WHITE)
+        screen.blit(email_label, (200, 150))
+        screen.blit(password_label, (200, 250))
 
-            print("El usuario o correo ya existe")
-            return False
-        else:
-            usuario_data = {
-                "email": email,
-                "password": contraseña,
-                "display_name": nombre
-            }
+        email_rect = pygame.Rect(350, 145, 300, 40)
+        password_rect = pygame.Rect(350, 245, 300, 40)
+        pygame.draw.rect(screen, GRAY, email_rect)
+        pygame.draw.rect(screen, GRAY, password_rect)
 
-            db.reference('users').push(usuario_data)
-            print(f"Usuario registrado con correo: {email}")
+        email_text = front_inicio.render(email_input, True, BLACK)
+        password_text = front_inicio.render("*" * len(password_input), True, BLACK)
+        screen.blit(email_text, (email_rect.x + 10, email_rect.y + 5))
+        screen.blit(password_text, (password_rect.x + 10, password_rect.y + 5))
 
-# Bucle principal
-running = True
-while running:
-    screen.fill(constantes.NEGRO)
-    
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        login_rect = pygame.Rect(350, 350, 120, 50)
+        pygame.draw.rect(screen, BLUE, login_rect)
+        login_text = front_inicio.render("Login", True, WHITE)
+        screen.blit(login_text, (login_rect.x + 20, login_rect.y + 10))
 
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_pos = event.pos
-            # Verificar si se hace clic en los campos de entrada
-            input_box_username = pygame.Rect(50, 80, 200, 40)
-            input_box_password = pygame.Rect(50, 150, 200, 40)
-            if input_box_username.collidepoint(mouse_pos):
-                active_input = "nombre"
-                print("seleccion label nombre")
-            elif input_box_password.collidepoint(mouse_pos):
-                active_input = "contraseña"
-                print("seleccion label contraseña")
-            else:
-                active_input = None
-                print("seleccion label nada")
+        register_rect = pygame.Rect(500, 350, 120, 50)
+        if show_register_button:
+            pygame.draw.rect(screen, GREEN, register_rect)
+            register_text = front_inicio.render("Sign Up", True, WHITE)
+            screen.blit(register_text, (register_rect.x + 10, register_rect.y + 10))
 
-    # Manejo de entrada de texto
-        elif event.type == pygame.KEYDOWN:
-            print("escribiendo")
-            if event.key == pygame.K_RETURN:
-                if login(text_nombre, text_contraseña) == True:
+        if requesting_name:
+            name_label = front_inicio.render("Name:", True, WHITE)
+            screen.blit(name_label, (200, 300))
+            name_rect = pygame.Rect(350, 295, 300, 40)
+            pygame.draw.rect(screen, GRAY, name_rect)
+            name_text = front_inicio.render(name_input, True, BLACK)
+            screen.blit(name_text, (name_rect.x + 10, name_rect.y + 5))
 
-                    # Redirijir a pagina principal ESTO ES IMPORTANTE
+        if error_message:
+            error_color = RED if "❌" in error_message else GREEN
+            error_text = small_font.render(error_message, True, error_color)
+            screen.blit(error_text, (350, 420))
 
-                    print("redirijiendo")
-            elif event.key == pygame.K_BACKSPACE:
-                print("borrando")
-                if active_input == "nombre":
-                    text_nombre = text_nombre[:-1]
-                    print("nombre")
-                elif active_input == "contraseña":
-                    text_contraseña = text_contraseña[:-1]
-                    print("contraseña")
-            else:
-                print(event.unicode)
-                if active_input == "nombre":
-                    text_nombre += event.unicode
-                    print("en el nombre")
-                elif active_input == "contraseña":
-                    text_contraseña += event.unicode
-                    print("en la contraseña")
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-    # Mostrar etiquetas y campos de entrada
-    username_label = font.render("Usuario", True, constantes.BLANCO)
-    password_label = font.render("Contraseña", True, constantes.BLANCO)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if email_rect.collidepoint(event.pos):
+                    active_input = "email"
+                elif password_rect.collidepoint(event.pos):
+                    active_input = "password"
+                elif requesting_name and name_rect.collidepoint(event.pos):
+                    active_input = "name"
+                elif login_rect.collidepoint(event.pos):
+                    if authenticate_user(email_input, password_input):
+                        pygame.quit()
+                        menu_principal()  # Llamar al menú principal tras inicio de sesión exitoso
+                        return
+                elif show_register_button and register_rect.collidepoint(event.pos):
+                    requesting_name = True  
 
-    box_username = pygame.Rect(50,80, 200, 40)
-    box_password = pygame.Rect(50,150, 200, 40)
+            if event.type == pygame.KEYDOWN:
+                if active_input == "email":
+                    if event.key == pygame.K_BACKSPACE:
+                        email_input = email_input[:-1]
+                    else:
+                        email_input += event.unicode
+                elif active_input == "password":
+                    if event.key == pygame.K_BACKSPACE:
+                        password_input = password_input[:-1]
+                    else:
+                        password_input += event.unicode
+                elif active_input == "name":
+                    if event.key == pygame.K_BACKSPACE:
+                        name_input = name_input[:-1]
+                    else:
+                        name_input += event.unicode
+                    if event.key == pygame.K_RETURN and name_input:
+                        if register_user(email_input, password_input, name_input):
+                            pygame.quit()
+                            menu_principal()  # Llamar al menú principal tras registro exitoso
+                            return
 
-    pygame.draw.rect(screen, ACTIVE_COLOR if active_input == "nombre" else INACTIVE_COLOR, box_username)
-    pygame.draw.rect(screen, ACTIVE_COLOR if active_input == "contraseña" else INACTIVE_COLOR, box_password)
+        pygame.display.flip()
 
-    input_surface = font.render(text_nombre, True, constantes.NEGRO)  # Renderizar el texto
-    screen.blit(input_surface, (box_username.x + 5, box_username.y + 5))
-
-    input_surface = font.render('*' * len(text_contraseña), True, constantes.NEGRO)  # Renderizar el texto
-    screen.blit(input_surface, (box_password.x + 5, box_password.y + 5))
-
-    screen.blit(username_label, (50, 50))
-    screen.blit(password_label, (50, 120))
-
-    pygame.display.flip()
-
-pygame.quit()
+    pygame.quit()
