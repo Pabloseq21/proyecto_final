@@ -5,13 +5,18 @@ pygame.init()  # Inicializa Pygame
 pygame.font.init()  # 🔹 Inicializa el módulo de fuentes
 
 # Ahora ya puedes cargar fuentes sin problemas
-front_inicio = pygame.font.Font("fonts/Minecraft.ttf", 25)
+front_inicio = pygame.font.Font("assents/Font/Minecraft.ttf", 25)
 small_font = pygame.font.Font(None, 30)
-ruta_fuente = os.path.join(os.path.dirname(__file__), "Font", "Minecraft.ttf")
+ruta_fuente = os.path.join(os.path.dirname(__file__), "assents", "Font", "Minecraft.ttf")
 front_inicio = pygame.font.Font(ruta_fuente, 25)
-
+try:
+    front_inicio = pygame.font.Font(ruta_fuente, 25)
+    print("Fuente cargada correctamente.")
+except Exception as e:
+    print(f"Error al cargar la fuente: {e}")
+    
 WIDTH = 800   # Ancho de la ventana
-HEIGHT = 600 # Alto de la ventana
+HEIGHT = 600        # Alto de la ventana
 
 # tamano ventana
 WIDTH_VENTANA = 200

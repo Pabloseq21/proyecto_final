@@ -1,7 +1,7 @@
 import pygame
 import firebase_admin
 from firebase_admin import credentials, db
-from MAIN import menu_principal 
+from main import menu_principal 
 
 try:
     firebase_admin.get_app()  # Verifica si Firebase ya está inicializado
