@@ -2,8 +2,8 @@ import pygame
 import os
 import random
 import math
-from moviepy import VideoFileClip  # Importa moviepy
-
+from moviepy import VideoFileClip 
+from main import seleccionar_mapa
 from pyparsing import col
 
 pygame.init()
@@ -28,7 +28,7 @@ contador_pacman = 0
 contador_fantasmas = 0
 
 # Colores
-CYAN, NEGRO, ROJO, AMARILLO,BLANCO = (0, 255, 255), (0, 0, 0), (255, 0, 0), (255, 255, 0), (255,255,255)
+CYAN, NEGRO, ROJO, AMARILLO,BLANCO = (0, 255, 255), (0, 0, 0), (255, 0, 0), (255, 255, 0), (255, 255, 255)
 
 mapa =  [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -342,11 +342,29 @@ fantasmas = [
     Fantasmas(10, 9, "fantasma_rosa", False, True, False,False,1000)]
 
 def mostrar_game_over():
-    # Reproduce el video de Game Over
+    # Reproduce el video de Game Over usando pygame
     video_path = "assents/videos/game_over.mp4"
     clip = VideoFileClip(video_path)
-    clip.preview()  # Reproduce el video en una ventana
-    pygame.time.wait(int(clip.duration * 80000))  # Espera la duración del video en milisegundos
+    
+    # Configuración de la ventana de pygame
+    screen = pygame.display.set_mode(clip.size)
+    pygame.display.set_caption("Game Over")
+
+    # Reproduce el video
+    for frame in clip.iter_frames(fps=30, dtype="uint8"):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+        surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))
+        screen.blit(surface, (0, 0))
+        pygame.display.update()
+        pygame.time.wait(int(1000 / 30))  # Espera para mantener la tasa de fotogramas
+
+    # Espera un poco después de que el video termine
+    pygame.time.wait(500)
+    
+    seleccionar_mapa()
 
 #clase para pacman 
 class Pacman:

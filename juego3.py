@@ -2,7 +2,8 @@ import pygame
 import os
 import random
 import math
-
+from moviepy import VideoFileClip 
+from main import seleccionar_mapa
 from pyparsing import col
 
 pygame.init()
@@ -27,29 +28,29 @@ contador_pacman = 0
 contador_fantasmas = 0
 
 # Colores
-CYAN, NEGRO, ROJO, AMARILLO,BLANCO = (0, 255, 255), (0, 0, 0), (255, 0, 0), (255, 255, 0), (255,255,255)
+CYAN, NEGRO, ROJO, AMARILLO,BLANCO = (0, 255, 255), (0, 0, 0), (255, 0, 0), (255, 255, 0), (255, 255, 255)
 
 mapa =  [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1],
-    [1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1],
+    [1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1],
+    [1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1],
     [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1],
-    [0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0],
-    [1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1],
-    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-    [1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1],
-    [0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0],
-    [1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1],
+    [1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+    [1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1],
     [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
     [1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1],
     [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     ]
@@ -60,15 +61,15 @@ imagen_punto = pygame.image.load("assents/images/puntos/puntos.png")
 imagen_punto = pygame.transform.scale(imagen_punto,(10,10))
 puntos =[]
 puntaje = 0
-fuente = pygame.font.Font(None,36)
+fuente = pygame.font.Font("assents/Font/Minecraft.ttf", 36)  
 
 excepciones_circulos = [
         (3,1),(3,17),(16,1),(16,17),
-        (8,0),(8,1),(8,2),(8,6),(8,7),(8,8),(8,9),(8,10),(8,11),(8,12),(8,13),(8,16),(8,18),(8,17),    
+        (8,6),(8,7),(8,8),(8,9),(8,10),(8,11),(8,12),(8,13),    
         (9,6),(9,9),(9,12),
-        (10,0),(10,1),(10,2),(10,3),(10,5),(10,6),(10,7),(10,8),(10,9),(10,10),(12,10),(10,11),(10,12),(10,13),(10,15),(10,16),(10,18),(10,17),
+        (10,0),(10,5),(10,6),(10,7),(10,8),(10,9),(10,10),(12,10),(10,11),(10,12),(10,13),(10,18),
         (11,6),(11,12),
-        (12,0),(12,1),(12,2),(12,6),(12,7),(12,8),(12,9),(12,10),(12,11),(12,12),(12,13),(12,16),(12,18),(12,17),
+        (12,6),(12,7),(12,8),(12,9),(12,10),(12,11),(12,12),(12,13),
         (13,6),(13,12)
         ]
 poderes_casilla = [(3,1),(3,17),(16,1),(16,17)]
@@ -94,8 +95,15 @@ def verificar_puntos(pacman_x,pacman_y):
         puntaje += 100 
         
 def mostrar_puntaje():
-    texto =fuente.render(f"puntaje: {puntaje}",True,BLANCO)
-    ventana.blit(texto,(10,10))
+    texto_puntaje = fuente.render(f"puntaje: {puntaje}", True, BLANCO)
+    texto_1up = fuente.render("1 UP", True, BLANCO)
+    
+    # Calcular las posiciones centradas
+    puntaje_rect = texto_puntaje.get_rect(center=(ANCHO // 2, 30))
+    up_rect = texto_1up.get_rect(center=(ANCHO // 2, 70))
+    
+    ventana.blit(texto_puntaje, puntaje_rect)
+    ventana.blit(texto_1up, up_rect)
 
 # Cargar imágenes de fantasmas
 DIRECTORIO_FANTASMAS = "assents/images/fantasmas"
@@ -333,6 +341,31 @@ fantasmas = [
     Fantasmas(10, 10, "fantasma_naranja", False, False, True,False,5000),
     Fantasmas(10, 9, "fantasma_rosa", False, True, False,False,1000)]
 
+def mostrar_game_over():
+    # Reproduce el video de Game Over usando pygame
+    video_path = "assents/videos/game_over.mp4"
+    clip = VideoFileClip(video_path)
+    
+    # Configuración de la ventana de pygame
+    screen = pygame.display.set_mode(clip.size)
+    pygame.display.set_caption("Game Over")
+
+    # Reproduce el video
+    for frame in clip.iter_frames(fps=30, dtype="uint8"):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+        surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))
+        screen.blit(surface, (0, 0))
+        pygame.display.update()
+        pygame.time.wait(int(1000 / 30))  # Espera para mantener la tasa de fotogramas
+
+    # Espera un poco después de que el video termine
+    pygame.time.wait(500)
+    
+    seleccionar_mapa()
+
 #clase para pacman 
 class Pacman:
     def __init__(self, fila, columna):
@@ -369,6 +402,7 @@ class Pacman:
                     fantasma.comido = True  # Marca el fantasma como comido
                 elif not fantasma.vulnerable and not fantasma.comido:
                     print("Game Over")
+                    mostrar_game_over()  # Mostrar el video de Game Over
                     pygame.quit()
                     exit()
             
@@ -393,7 +427,7 @@ class Pacman:
         if self.fila == 10:
             if self.columna == 0 and self.direccion == "izquierda":
                 self.columna = COLUMNAS - 1
-            elif self.columna == COLUMNAS - 1 and self.direccion == "derecha":
+            elif self.columna == COLUMNAS - 1 and  self.direccion == "derecha":
                 self.columna = 0
 
     def draw(self):
@@ -407,13 +441,28 @@ class Pacman:
             
 pacman = Pacman(16, 9)  #poscicion inicial de pacman               
 
+# Define una variable para almacenar el tiempo del último decremento del puntaje
+ultimo_decremento = pygame.time.get_ticks()
+
+# Cargar imagen de los márgenes
+imagen_margen = pygame.image.load("assents/images/margen/margen.png")
+imagen_margen = pygame.transform.scale(imagen_margen, (MARGEN, ALTO // 2))
+
+def dibujar_margen():
+    # Dibujar la imagen en los márgenes izquierdo y derecho
+    ventana.blit(imagen_margen, (0, 0))
+    ventana.blit(imagen_margen, (0, ALTO // 2))
+    ventana.blit(imagen_margen, (ANCHO - MARGEN, 0))
+    ventana.blit(imagen_margen, (ANCHO - MARGEN, ALTO // 2))
+
 def main():
-    global puntos_casilla
+    global puntos_casilla, ultimo_decremento, puntaje
     puntos_casilla = [(fila, col) for fila in range(len(mapa)) for col in range(len(mapa[0])) if mapa[fila][col] == 0 and (fila, col) not in excepciones_circulos]
     
     run = True
     while run:
         ventana.fill(NEGRO)
+        dibujar_margen()  # Dibujar los márgenes
         dibujar_celdas()
         dibujar_mapa()
         verificar_puntos(pacman.fila, pacman.columna)  # Verifica puntos y actualiza el puntaje
@@ -434,6 +483,11 @@ def main():
         for fantasma in fantasmas:
             fantasma.mover(ocupadas,pacman)
             fantasma.draw()
+        
+        # Reducir el puntaje en una unidad cada 3 segundos
+        if pygame.time.get_ticks() - ultimo_decremento >= 3000:
+            puntaje -= 1
+            ultimo_decremento = pygame.time.get_ticks()
             
         if not puntos_casilla:
             print("pasaste de nivel")
