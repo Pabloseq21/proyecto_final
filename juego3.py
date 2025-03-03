@@ -365,6 +365,31 @@ def mostrar_game_over():
     pygame.time.wait(500)
     
     seleccionar_mapa()
+    
+def mostrar_victoria():
+    # Reproduce el video de Victoria 
+    video_path = "assents/videos/victoria.mp4"
+    clip = VideoFileClip(video_path)
+    
+    # Configuración de la ventana 
+    screen = pygame.display.set_mode(clip.size)
+    pygame.display.set_caption("Victoria")
+
+    # Reproduce el video
+    for frame in clip.iter_frames(fps=30, dtype="uint8"):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+        surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))
+        screen.blit(surface, (0, 0))
+        pygame.display.update()
+        pygame.time.wait(int(1000 / 30))  # Espera para mantener la tasa de fotogramas
+
+    # Espera un poco después de que el video termine
+    pygame.time.wait(500)
+    
+    seleccionar_mapa()
 
 #clase para pacman 
 class Pacman:

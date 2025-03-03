@@ -107,6 +107,33 @@ def ventana_top_scores():
                     menu_principal()
         pygame.display.flip()
 
+def ventana_multiplayer_opciones():
+    run = True
+    while run:
+        vent.fill((0, 0, 0))
+        mensaje = constantes.front_inicio.render("Multiplayer Options", True, (255, 255, 255))
+        vent.blit(mensaje, (constantes.WIDTH / 2 - mensaje.get_width() / 2, 50))
+        boton_online = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 - 50, 200, 50)
+        boton_local = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 + 50, 200, 50)
+        boton_exit = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 + 150, 200, 50)
+        dibujar_boton("Online", boton_online.centerx, boton_online.centery, constantes.front_inicio)
+        dibujar_boton("Local", boton_local.centerx, boton_local.centery, constantes.front_inicio)
+        dibujar_boton("EXIT", boton_exit.centerx, boton_exit.centery, constantes.front_inicio)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if boton_online.collidepoint(event.pos):
+                    subprocess.run(["python", "1v1online.py"])
+                    pass
+                elif boton_local.collidepoint(event.pos):
+                    subprocess.run(["python", "1v1local.py"])
+                    pass
+                elif boton_exit.collidepoint(event.pos):
+                    run = False
+                    ventana_online_opciones()
+        pygame.display.flip()
+
 def ventana_online_opciones():
     run = True
     while run:
@@ -124,14 +151,14 @@ def ventana_online_opciones():
                 run = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if boton_multiplayer.collidepoint(event.pos):
-                    subprocess.run(["python", "juego.py"])
+                    ventana_multiplayer_opciones()
                 elif boton_single_player.collidepoint(event.pos):
                     seleccionar_mapa()
                 elif boton_exit.collidepoint(event.pos):
                     run = False
                     menu_principal()
         pygame.display.flip()
-        
+
 def seleccionar_mapa():
     seleccionando_mapa = True
     while seleccionando_mapa:
@@ -153,9 +180,9 @@ def seleccionar_mapa():
                 if boton_mapa_1.collidepoint(event.pos):
                     subprocess.run(["python", "juego.py"])
                 elif boton_mapa_2.collidepoint(event.pos):
-                    subprocess.run(["python", "juego.py"])
+                    subprocess.run(["python", "juego2.py"])
                 elif boton_mapa_3.collidepoint(event.pos):
-                    subprocess.run(["python", "juego.py"])
+                    subprocess.run(["python", "juego3.py"])
                 elif boton_exit.collidepoint(event.pos):
                     seleccionando_mapa = False
                     ventana_online_opciones()

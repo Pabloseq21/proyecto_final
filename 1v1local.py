@@ -15,13 +15,13 @@ TAM_CELDA = 35
 ANCHO, ALTO = COLUMNAS * TAM_CELDA + 2 * MARGEN, FILAS * TAM_CELDA + 2 * MARGEN
 
 ventana = pygame.display.set_mode((ANCHO, ALTO))
-pygame.display.setCaption("Fantasmas")
+pygame.display.set_caption("Fantasmas")
 clock = pygame.time.Clock()
 fps = 30
 
 # Velocidades
 pasos_pacman = 5  # Pac-Man se mueve cada 4 fotogramas
-pasos_fantasmas = 18  # Los fantasmas se mueven cada 5 fotogramas
+pasos_fantasmas = pasos_pacman + 0.5  # Los fantasmas se mueven 0.5 fotogramas más lento que Pac-Man
 
 # Contadores
 contador_pacman = 0
@@ -30,29 +30,30 @@ contador_fantasmas = 0
 # Colores
 CYAN, NEGRO, ROJO, AMARILLO,BLANCO = (0, 255, 255), (0, 0, 0), (255, 0, 0), (255, 255, 0), (255, 255, 255)
 
-mapa = [
+mapa =  [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-    [1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1],
-    [1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1],
-    [1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1],
+    [0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0],
+    [1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1],
+    [0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0],
+    [1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+    [1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1],
+    [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-]
+    ]
 
 imagen_poder = pygame.image.load("assents/images/poder/poder.png")
 imagen_poder = pygame.transform.scale(imagen_poder,(30,30))
@@ -64,11 +65,11 @@ fuente = pygame.font.Font("assents/Font/Minecraft.ttf", 36)
 
 excepciones_circulos = [
         (3,1),(3,17),(16,1),(16,17),
-        (8,6),(8,7),(8,8),(8,9),(8,10),(8,11),(8,12),(8,13),   
+        (8,0),(8,1),(8,2),(8,6),(8,7),(8,8),(8,9),(8,10),(8,11),(8,12),(8,13),(8,16),(8,18),(8,17),    
         (9,6),(9,9),(9,12),
-        (10,5),(10,6),(10,7),(10,8),(10,9),(10,10),(12,10),(10,11),(10,12),(10,13),(10,15),
+        (10,0),(10,1),(10,2),(10,3),(10,5),(10,6),(10,7),(10,8),(10,9),(10,10),(12,10),(10,11),(10,12),(10,13),(10,15),(10,16),(10,18),(10,17),
         (11,6),(11,12),
-        (12,6),(12,7),(12,8),(12,9),(12,10),(12,11),(12,12),(12,13),
+        (12,0),(12,1),(12,2),(12,6),(12,7),(12,8),(12,9),(12,10),(12,11),(12,12),(12,13),(12,16),(12,18),(12,17),
         (13,6),(13,12)
         ]
 poderes_casilla = [(3,1),(3,17),(16,1),(16,17)]
@@ -76,7 +77,7 @@ puntos_casilla = []
 def dibujar_mapa():
     global puntos_casilla
     for fila in range(len(mapa)):
-        for col in range(len(mapa[0])): 
+        for col in range(len(mapa[0])):
             color = (0, 0, 255) if mapa[fila][col] == 1 else (0, 0, 0)
             pygame.draw.rect(ventana, color, (col * TAM_CELDA + MARGEN, fila * TAM_CELDA + MARGEN, TAM_CELDA, TAM_CELDA))
             
@@ -109,33 +110,54 @@ DIRECTORIO_FANTASMAS = "assents/images/fantasmas"
 animaciones_fantasmas = {}
 
 def cargar_imagenes():
-    for nombre in os.listdir(DIRECTORIO_FANTASMAS):
-        ruta = os.path.join(DIRECTORIO_FANTASMAS, nombre)
-        if os.path.isdir(ruta):
-            animaciones_fantasmas[nombre] = {}
-            for direccion in ["izquierda", "derecha", "arriba", "abajo"]:
-                animaciones_fantasmas[nombre][direccion] = []
-                for i in range(2):
-                    imagen_path = os.path.join(ruta, f"{nombre}_{direccion}_{i+1}.png")
-                    if os.path.exists(imagen_path):
-                        imagen = pygame.image.load(imagen_path).convert_alpha()
-                        imagen = pygame.transform.scale(imagen, (TAM_CELDA, TAM_CELDA))
-                        animaciones_fantasmas[nombre][direccion].append(imagen)
-# Cargar imágenes de fantasmas vulnerables
+    if not os.path.exists(DIRECTORIO_FANTASMAS):
+        print(f"Error: El directorio {DIRECTORIO_FANTASMAS} no existe.")
+        return
+
+    # Cargar imágenes de fantasmas vulnerables (sin dirección)
     animaciones_fantasmas["vulnerables"] = []
     for i in range(2):
         imagen_path = os.path.join(DIRECTORIO_FANTASMAS, "vulnerables", f"vulnerable_{i+1}.png")
         if os.path.exists(imagen_path):
-            imagen = pygame.image.load(imagen_path).convert_alpha()
-            imagen = pygame.transform.scale(imagen, (TAM_CELDA, TAM_CELDA))
-            animaciones_fantasmas["vulnerables"].append(imagen)
-    # Cargar imagen de fantasmas comidos
+            try:
+                imagen = pygame.image.load(imagen_path).convert_alpha()
+                imagen = pygame.transform.scale(imagen, (TAM_CELDA, TAM_CELDA))
+                animaciones_fantasmas["vulnerables"].append(imagen)
+            except pygame.error as e:
+                print(f"Error al cargar la imagen {imagen_path}: {e}")
+        else:
+            print(f"Advertencia: La imagen {imagen_path} no existe.")
+    
+    # Cargar imágenes del fantasma azul
+    animaciones_fantasmas["fantasma_azul"] = {"izquierda": [], "derecha": [], "arriba": [], "abajo": []}
+    for direccion in ["izquierda", "derecha", "arriba", "abajo"]:
+        for i in range(2):
+            imagen_path = os.path.join(DIRECTORIO_FANTASMAS, "fantasma_azul", f"fantasma_azul_{direccion}_{i+1}.png")
+            if os.path.exists(imagen_path):
+                try:
+                    imagen = pygame.image.load(imagen_path).convert_alpha()
+                    imagen = pygame.transform.scale(imagen, (TAM_CELDA, TAM_CELDA))
+                    animaciones_fantasmas["fantasma_azul"][direccion].append(imagen)
+                except pygame.error as e:
+                    print(f"Error al cargar la imagen {imagen_path}: {e}")
+            else:
+                print(f"Advertencia: La imagen {imagen_path} no existe.")
+    
+    # Cargar imagen de fantasmas comidos (sin dirección)
     imagen_path = os.path.join(DIRECTORIO_FANTASMAS, "comido", "comido.png")
     if os.path.exists(imagen_path):
-        imagen = pygame.image.load(imagen_path).convert_alpha()
-        imagen = pygame.transform.scale(imagen, (TAM_CELDA, TAM_CELDA))
-        animaciones_fantasmas["comido"] = imagen
+        try:
+            imagen = pygame.image.load(imagen_path).convert_alpha()
+            imagen = pygame.transform.scale(imagen, (TAM_CELDA, TAM_CELDA))
+            animaciones_fantasmas["comido"] = imagen
+        except pygame.error as e:
+            print(f"Error al cargar la imagen {imagen_path}: {e}")
+    else:
+        print(f"Advertencia: La imagen {imagen_path} no existe.")
+
 cargar_imagenes()
+print(animaciones_fantasmas)
+
 # Pac-Man
 DIRECTORIO_PACMAN = "assents/images/pacman"
 animaciones_pacman = {}
@@ -157,14 +179,10 @@ def dibujar_celdas():
             pygame.draw.rect(ventana, CYAN, (col * TAM_CELDA + MARGEN, fila * TAM_CELDA + MARGEN, TAM_CELDA, TAM_CELDA), 1)
             
 class Fantasmas:
-    def __init__(self, fila, columna, tipo, persigue, embosca, rodear, aleatorio, tiempo_salida):
+    def __init__(self, fila, columna, tipo, tiempo_salida):
         self.fila, self.columna, self.tipo = fila, columna, tipo
         self.direccion = random.choice(["izquierda", "derecha", "arriba", "abajo"])
         self.frame, self.last_update = 0, pygame.time.get_ticks()
-        self.persigue = persigue
-        self.embosca = embosca
-        self.rodear = rodear
-        self.aleatorio = aleatorio
         self.contador_movimiento = 0
         self.tiempo_salida = tiempo_salida
         self.inicio = pygame.time.get_ticks()
@@ -174,14 +192,7 @@ class Fantasmas:
         self.volviendo = False
         self.comido = False
         self.target = (fila, columna)  # Inicializa self.target
-        if aleatorio:
-            self.direccion = "derecha"
-        elif rodear:
-            self.direccion = "izquierda"
-        elif embosca:
-            self.direccion = "arriba"
-        else:
-            self.direccion = random.choice(["izquierda", "derecha", "arriba", "abajo"])
+        self.controlado_por_jugador = True  # Permitir el control del jugador
 
     def activar_vulnerabilidad(self):
         self.vulnerable = True
@@ -190,16 +201,7 @@ class Fantasmas:
 
     def modo_vulnerable(self, vulnerable):
         if vulnerable and not self.vulnerable:
-            self.direccion_contraria()
-            self.meta_random()
-        self.vulnerable = vulnerable
-
-    def direccion_contraria(self):
-        direcciones_opuestas = {"arriba": "abajo", "abajo": "arriba", "izquierda": "derecha", "derecha": "izquierda"}
-        self.direccion = direcciones_opuestas[self.direccion]
-
-    def meta_random(self):
-        self.target = (random.randint(0, FILAS - 1), random.randint(0, COLUMNAS - 1))
+            self.vulnerable = vulnerable
 
     def actualizar_estado(self):
         if self.vulnerable and pygame.time.get_ticks() - self.tiempo_vulnerable > 6000:  # tiempo de vulnerabilidad de los fantasmas
@@ -209,114 +211,65 @@ class Fantasmas:
         self.volviendo = True
         self.vulnerable = False
         self.comido = True
-        self.fila, self.columna = self.poscicion_inicial  # Vuelve a la posición inicial
+        self.controlado_por_jugador = False  # Desactivar el control del jugador
+        self.target = self.poscicion_inicial  # Establecer la meta como la posición inicial
 
-    def mover(self, ocupadas, pacman):
+    def mover(self, keys, ocupadas):
         self.actualizar_estado()
+
         if pygame.time.get_ticks() - self.inicio < self.tiempo_salida:
             return
-
         self.contador_movimiento += 1
-        if self.comido:
-            velocidad = pasos_fantasmas // 1  # Aumenta la velocidad en un 50% cuando está comido
-        else:
-            velocidad = pasos_fantasmas if not self.volviendo else pasos_fantasmas // 2  # la velocidad disminuye cuando están volviendo
-
-        if self.contador_movimiento < velocidad:
+        if self.contador_movimiento < pasos_fantasmas:
             return
         self.contador_movimiento = 0
 
-        if not hasattr(self, "llego_meta"):
-            self.llego_meta = False
-
-        if not self.llego_meta:
-            objetivo_fila, objetivo_col = 8, 9
-            if (self.fila, self.columna) == (8, 9):
-                self.llego_meta = True
-        else:
-            if self.vulnerable:
-                objetivo_fila, objetivo_col = self.target
-            else:
-                objetivo_fila, objetivo_col = pacman.fila, pacman.columna
-
-        # Definir las opciones de movimiento
-        opciones = [
-            (self.fila - 1, self.columna, "arriba"),
-            (self.fila + 1, self.columna, "abajo"),
-            (self.fila, self.columna - 1, "izquierda"),
-            (self.fila, self.columna + 1, "derecha")
-        ]
-
-        # Direcciones opuestas
-        direcciones_opuestas = {"arriba": "abajo", "abajo": "arriba", "izquierda": "derecha", "derecha": "izquierda"}
-
-        # Filtrar opciones válidas
-        if self.comido:
-            opciones_validas = [
-                (fila, col, dir)
-                for fila, col, dir in opciones
-                if 0 <= fila < FILAS and 0 <= col < COLUMNAS
-                and mapa[fila][col] != 1
-            ]
-        else:
-            opciones_validas = [
-                (fila, col, dir)
-                for fila, col, dir in opciones
-                if 0 <= fila < FILAS and 0 <= col < COLUMNAS
-                and (fila, col) not in ocupadas
-                and mapa[fila][col] != 1
-                and dir != direcciones_opuestas[self.direccion]  # Evitar retrocesos constantes
-            ]
-
         if self.volviendo:
-            objetivo_fila, objetivo_col = self.poscicion_inicial
+            # Movimiento automático hacia la posición inicial
+            if self.fila < self.target[0]:
+                self.fila += 1
+                self.direccion = "abajo"
+            elif self.fila > self.target[0]:
+                self.fila -= 1
+                self.direccion = "arriba"
+            elif self.columna < self.target[1]:
+                self.columna += 1
+                self.direccion = "derecha"
+            elif self.columna > self.target[1]:
+                self.columna -= 1
+                self.direccion = "izquierda"
+            
+            # Si el fantasma ha llegado a la posición inicial
             if (self.fila, self.columna) == self.poscicion_inicial:
                 self.volviendo = False
                 self.comido = False
+                self.controlado_por_jugador = True  # Devolver el control al jugador
+            return
 
-        # para el fantasma naranja que su meta es dos casillas antes de la poscicion de pacman
-        if self.rodear and not self.volviendo:
-            if pacman.direccion == "arriba":
-                objetivo_fila += 4
-            elif pacman.direccion == "abajo":
-                objetivo_fila -= 4
-            elif pacman.direccion == "izquierda":
-                objetivo_col += 4
-            elif pacman.direccion == "derecha":
-                objetivo_col -= 4
+        if self.controlado_por_jugador:
+            nueva_fila, nueva_col = self.fila, self.columna
+            if keys[pygame.K_UP]:
+                nueva_fila -= 1
+                self.direccion = "arriba"
+            elif keys[pygame.K_DOWN]:
+                nueva_fila += 1
+                self.direccion = "abajo"
+            elif keys[pygame.K_LEFT]:
+                nueva_col -= 1
+                self.direccion = "izquierda"
+            elif keys[pygame.K_RIGHT]:
+                nueva_col += 1
+            # Verificar si la nueva posición es válida antes de moverse
+            if (0 <= nueva_fila < FILAS and 0 <= nueva_col < COLUMNAS and 
+                mapa[nueva_fila][nueva_col] != 1 and (nueva_fila, nueva_col) not in ocupadas):
+                self.fila, self.columna = nueva_fila, nueva_col
 
-        # para el fantasmas rosado que su meta esta dos casillas adelante de la poscicion de pacman
-        if self.embosca and not self.volviendo:
-            if pacman.direccion == "arriba":
-                objetivo_fila -= 4
-            elif pacman.direccion == "abajo":
-                objetivo_fila += 4
-            elif pacman.direccion == "izquierda":
-                objetivo_col += 4
-            elif pacman.direccion == "derecha":
-                objetivo_col += 4
-
-        # para el fantasmas azul que su movimiento es aleatorio
-        if self.aleatorio and not self.volviendo:
-            self.fila, self.columna, self.direccion = random.choice(opciones_validas)
-
-        # en la fila 2 se tepea de la ultima columna a la primera y viceversa
-        if self.fila == 2:
+        # en la fila 10 se tepea de la ultima columna a la primera y viceversa
+        if self.fila == 10:
             if self.columna == 0 and self.direccion == "izquierda":
                 self.columna = COLUMNAS - 1
             elif self.columna == COLUMNAS - 1 and self.direccion == "derecha":
                 self.columna = 0
-
-        # limitante para la casilla (9,9) solo se pueden mover hacia arriba no se puede ir hacia abajo
-        if (self.fila, self.columna) in [(9, 9), (8, 9)]:
-            opciones_validas = [opcion for opcion in opciones_validas if opcion[2] != "abajo"]
-
-        if opciones_validas:
-            mejor_opcion = min(
-                opciones_validas,
-                key=lambda pos: math.sqrt((pos[0] - objetivo_fila) ** 2 + (pos[1] - objetivo_col) ** 2)
-            )
-            self.fila, self.columna, self.direccion = mejor_opcion
 
     def draw(self):
         x, y = self.columna * TAM_CELDA + MARGEN, self.fila * TAM_CELDA + MARGEN
@@ -334,18 +287,15 @@ class Fantasmas:
         else:
             ventana.blit(animaciones_fantasmas[self.tipo][self.direccion][self.frame], (x, y))
             
-fantasmas = [
-    Fantasmas(10, 8, "fantasma_azul", False,False, False,True,15000),
-    Fantasmas(8, 9, "fantasma_rojo", True, False, False,False,0),
-    Fantasmas(10, 10, "fantasma_naranja", False, False, True,False,5000),
-    Fantasmas(10, 9, "fantasma_rosa", False, True, False,False,1000)]
+# Eliminar la lista de fantasmas y crear un solo fantasma controlado por el jugador
+fantasma = Fantasmas(10, 8, "fantasma_azul", 0)
 
 def mostrar_game_over():
-    # Reproduce el video de Game Over 
+    # Reproduce el video de Game Over usando pygame
     video_path = "assents/videos/game_over.mp4"
     clip = VideoFileClip(video_path)
     
-    # Configuración de la ventana 
+    # Configuración de la ventana de pygame
     screen = pygame.display.set_mode(clip.size)
     pygame.display.set_caption("Game Over")
 
@@ -364,7 +314,7 @@ def mostrar_game_over():
     pygame.time.wait(500)
     
     seleccionar_mapa()
-    
+
 def mostrar_victoria():
     # Reproduce el video de Victoria 
     video_path = "assents/videos/victoria.mp4"
@@ -411,7 +361,7 @@ class Pacman:
                 poderes_casilla.remove(poder)
                 self.modo_poder = True
                 self.tiempo_poder = pygame.time.get_ticks()
-                for fantasma in fantasmas:
+                for fantasma in fantasma:
                     fantasma.activar_vulnerabilidad()
                 
     def actualizar_poder(self):
@@ -447,6 +397,12 @@ class Pacman:
             self.direccion, nueva_col = "derecha", self.columna + 1
         if (nueva_fila, nueva_col) not in ocupadas and 0 <= nueva_fila < FILAS and 0 <= nueva_col < COLUMNAS and mapa[nueva_fila][nueva_col] != 1:
             self.fila, self.columna = nueva_fila, nueva_col
+            
+        if self.fila == 10:
+            if self.columna == 0 and self.direccion == "izquierda":
+                self.columna = COLUMNAS - 1
+            elif self.columna == COLUMNAS - 1 and  self.direccion == "derecha":
+                self.columna = 0
 
     def draw(self):
         x, y = self.columna * TAM_CELDA + MARGEN, self.fila * TAM_CELDA + MARGEN
@@ -486,7 +442,7 @@ def main():
         verificar_puntos(pacman.fila, pacman.columna)  # Verifica puntos y actualiza el puntaje
         mostrar_puntaje()
         
-        ocupadas = {(f.fila, f.columna) for f in fantasmas if not f.comido}  # Excluir fantasmas comidos
+        ocupadas = {(fantasma.fila, fantasma.columna)}  # Solo el fantasma azul ocupa una casilla
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -496,11 +452,11 @@ def main():
         pacman.draw()
         pacman.comer(puntos_casilla, poderes_casilla)  # Asegúrate de pasar los puntos y poderes correctos
         pacman.actualizar_poder()
-        pacman.verificar_colicion(fantasmas)  # Verifica colisiones con fantasmas
+        pacman.verificar_colicion([fantasma])  # Verifica colisiones con el único fantasma
         
-        for fantasma in fantasmas:
-            fantasma.mover(ocupadas,pacman)
-            fantasma.draw()
+        # Mover el fantasma con las flechas del teclado celda por celda
+        fantasma.mover(keys, ocupadas)
+        fantasma.draw()
         
         # Reducir el puntaje en una unidad cada 3 segundos
         if pygame.time.get_ticks() - ultimo_decremento >= 3000:
@@ -509,6 +465,7 @@ def main():
             
         if not puntos_casilla:
             print("pasaste de nivel")
+            mostrar_victoria()  # Mostrar el video de victoria
             run = False
         pygame.display.update()
         clock.tick(fps)
