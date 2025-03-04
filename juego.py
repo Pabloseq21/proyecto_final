@@ -209,7 +209,7 @@ class Fantasmas:
             self.vulnerable = False
 
     def meta_inicial(self):
-        if self.vulnerable:
+        if self.muerto:
             self.target = self.poscicion_inicial
             
     def mover(self, ocupadas, pacman):
@@ -219,7 +219,7 @@ class Fantasmas:
 
         self.contador_movimiento += 1
         if self.muerto:
-            velocidad = self.velocidad_normal // 1  # Aumenta la velocidad en un 50% cuando está muerto
+            velocidad = self.velocidad_normal // 2  # Aumenta la velocidad en un 100% cuando está muerto
         elif self.vulnerable:
             velocidad = self.velocidad_vulnerable
         else:
@@ -300,7 +300,7 @@ class Fantasmas:
 
         # para el fantasmas azul que su movimiento es aleatorio
         if self.aleatorio and not self.muerto:
-            self.fila, self.columna, self.direccion = random.choice(opciones_validas)
+            objetivo_fila,objetivo_col = random.choice(opciones_validas)
 
         # en la fila 10 se tepea de la ultima columna a la primera y viceversa
         if self.fila == 10:
