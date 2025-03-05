@@ -15,7 +15,7 @@ TAM_CELDA = 35
 ANCHO, ALTO = COLUMNAS * TAM_CELDA + 2 * MARGEN, FILAS * TAM_CELDA + 2 * MARGEN
 
 ventana = pygame.display.set_mode((ANCHO, ALTO))
-pygame.display.setCaption("Fantasmas")
+pygame.display.set_caption("Fantasmas")
 clock = pygame.time.Clock()
 fps = 30
 
@@ -129,12 +129,12 @@ def cargar_imagenes():
             imagen = pygame.image.load(imagen_path).convert_alpha()
             imagen = pygame.transform.scale(imagen, (TAM_CELDA, TAM_CELDA))
             animaciones_fantasmas["vulnerables"].append(imagen)
-    # Cargar imagen de fantasmas comidos
-    imagen_path = os.path.join(DIRECTORIO_FANTASMAS, "comido", "comido.png")
+    # Cargar imagen de fantasmas muertos
+    imagen_path = os.path.join(DIRECTORIO_FANTASMAS, "muerto", "muerto.png")
     if os.path.exists(imagen_path):
         imagen = pygame.image.load(imagen_path).convert_alpha()
         imagen = pygame.transform.scale(imagen, (TAM_CELDA, TAM_CELDA))
-        animaciones_fantasmas["comido"] = imagen
+        animaciones_fantasmas["muerto"] = imagen
 cargar_imagenes()
 # Pac-Man
 DIRECTORIO_PACMAN = "assents/images/pacman"
@@ -171,9 +171,10 @@ class Fantasmas:
         self.vulnerable = False
         self.tiempo_vulnerable = 0
         self.poscicion_inicial = (fila, columna)
-        self.volviendo = False
-        self.comido = False
+        self.muerto = False
         self.target = (fila, columna)  # Inicializa self.target
+        self.velocidad_normal = pasos_fantasmas
+        self.velocidad_vulnerable = pasos_fantasmas * 1.5
         if aleatorio:
             self.direccion = "derecha"
         elif rodear:
@@ -205,11 +206,9 @@ class Fantasmas:
         if self.vulnerable and pygame.time.get_ticks() - self.tiempo_vulnerable > 6000:  # tiempo de vulnerabilidad de los fantasmas
             self.vulnerable = False
 
-    def reiniciar_poscicion(self):
-        self.volviendo = True
-        self.vulnerable = False
-        self.comido = True
-        self.fila, self.columna = self.poscicion_inicial  # Vuelve a la posición inicial
+    def meta_inicial(self):
+        if self.muerto:
+            self.target = self.poscicion_inicial
 
     def mover(self, ocupadas, pacman):
         self.actualizar_estado()
@@ -217,11 +216,13 @@ class Fantasmas:
             return
 
         self.contador_movimiento += 1
-        if self.comido:
-            velocidad = pasos_fantasmas // 1  # Aumenta la velocidad en un 50% cuando está comido
+        if self.muerto:
+            velocidad = pasos_fantasmas // 2  # Aumenta la velocidad en un 50% cuando está comido
+        elif self.vulnerable:
+            velocidad = self.velocidad_vulnerable
         else:
-            velocidad = pasos_fantasmas if not self.volviendo else pasos_fantasmas // 2  # la velocidad disminuye cuando están volviendo
-
+            velocidad = self.velocidad_normal
+            
         if self.contador_movimiento < velocidad:
             return
         self.contador_movimiento = 0
@@ -251,7 +252,7 @@ class Fantasmas:
         direcciones_opuestas = {"arriba": "abajo", "abajo": "arriba", "izquierda": "derecha", "derecha": "izquierda"}
 
         # Filtrar opciones válidas
-        if self.comido:
+        if self.muerto:
             opciones_validas = [
                 (fila, col, dir)
                 for fila, col, dir in opciones
@@ -268,14 +269,13 @@ class Fantasmas:
                 and dir != direcciones_opuestas[self.direccion]  # Evitar retrocesos constantes
             ]
 
-        if self.volviendo:
+        if self.muerto:
             objetivo_fila, objetivo_col = self.poscicion_inicial
-            if (self.fila, self.columna) == self.poscicion_inicial:
-                self.volviendo = False
-                self.comido = False
+            if (self.fila,self.columna) == self.poscicion_inicial:
+                self.muerto = False
 
         # para el fantasma naranja que su meta es dos casillas antes de la poscicion de pacman
-        if self.rodear and not self.volviendo:
+        if self.rodear and not self.muerto:
             if pacman.direccion == "arriba":
                 objetivo_fila += 4
             elif pacman.direccion == "abajo":
@@ -286,7 +286,7 @@ class Fantasmas:
                 objetivo_col -= 4
 
         # para el fantasmas rosado que su meta esta dos casillas adelante de la poscicion de pacman
-        if self.embosca and not self.volviendo:
+        if self.embosca and not self.muerto:
             if pacman.direccion == "arriba":
                 objetivo_fila -= 4
             elif pacman.direccion == "abajo":
@@ -297,8 +297,8 @@ class Fantasmas:
                 objetivo_col += 4
 
         # para el fantasmas azul que su movimiento es aleatorio
-        if self.aleatorio and not self.volviendo:
-            self.fila, self.columna, self.direccion = random.choice(opciones_validas)
+        if self.aleatorio and not self.muerto:
+            self.target = random.choice(opciones_validas)
 
         # en la fila 2 se tepea de la ultima columna a la primera y viceversa
         if self.fila == 2:
@@ -325,8 +325,8 @@ class Fantasmas:
             self.last_update = now
             self.frame = (self.frame + 1) % 2  # Cambia el frame entre 0 y 1
 
-        if self.comido:
-            ventana.blit(animaciones_fantasmas["comido"], (x, y))
+        if self.muerto:
+            ventana.blit(animaciones_fantasmas["muerto"], (x, y))
         elif self.vulnerable:
             # Asegúrate de que la lista no esté vacía
             if animaciones_fantasmas["vulnerables"]:
@@ -422,9 +422,9 @@ class Pacman:
         for fantasma in fantasmas:
             if (self.fila, self.columna) == (fantasma.fila, fantasma.columna):
                 if self.modo_poder and fantasma.vulnerable:
-                    fantasma.reiniciar_poscicion()
-                    fantasma.comido = True  # Marca el fantasma como comido
-                elif not fantasma.vulnerable and not fantasma.comido:
+                    fantasma.meta_inicial()
+                    fantasma.muerto = True 
+                elif not fantasma.vulnerable and not fantasma.muerto:
                     print("Game Over")
                     mostrar_game_over()  # Mostrar el video de Game Over
                     pygame.quit()
@@ -486,7 +486,7 @@ def main():
         verificar_puntos(pacman.fila, pacman.columna)  # Verifica puntos y actualiza el puntaje
         mostrar_puntaje()
         
-        ocupadas = {(f.fila, f.columna) for f in fantasmas if not f.comido}  # Excluir fantasmas comidos
+        ocupadas = {(f.fila, f.columna) for f in fantasmas if not f.muerto}  # Excluir fantasmas comidos
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
