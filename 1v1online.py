@@ -7,6 +7,9 @@ import pickle
 from moviepy import VideoFileClip 
 from main import seleccionar_mapa
 from pyparsing import col
+import firebase_admin
+from firebase_admin import credentials, firestore
+from firebase_config import initialize_firebase
 
 pygame.init()
 
@@ -431,37 +434,28 @@ def dibujar_margen():
     ventana.blit(imagen_margen, (ANCHO - MARGEN, 0))
     ventana.blit(imagen_margen, (ANCHO - MARGEN, ALTO // 2))
 
-# Configuración del cliente
-HOST = '127.0.0.1'
-PORT = 5555
+# Inicializar Firebase
+db = initialize_firebase()
 
-# Conectar al servidor
-cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-cliente.connect((HOST, PORT))
-
-# Recibir el estado inicial del juego
-estado_juego = pickle.loads(cliente.recv(2048))
-
-# Actualizar las posiciones iniciales de Pac-Man y el fantasma
-pacman = Pacman(estado_juego['pacman']['fila'], estado_juego['pacman']['columna'])
-fantasma = Fantasmas(estado_juego['fantasma']['fila'], estado_juego['fantasma']['columna'], "fantasma_azul", 0)
-
+# Funciones para enviar y recibir estado usando Firebase
 def enviar_estado():
     estado = {
         'pacman': {'fila': pacman.fila, 'columna': pacman.columna, 'direccion': pacman.direccion},
         'fantasma': {'fila': fantasma.fila, 'columna': fantasma.columna, 'direccion': fantasma.direccion}
     }
-    cliente.send(pickle.dumps(estado))
+    db.collection('juego').document('estado').set(estado)
 
 def recibir_estado():
     global estado_juego
-    estado_juego = pickle.loads(cliente.recv(2048))
-    pacman.fila = estado_juego['pacman']['fila']
-    pacman.columna = estado_juego['pacman']['columna']
-    pacman.direccion = estado_juego['pacman']['direccion']
-    fantasma.fila = estado_juego['fantasma']['fila']
-    fantasma.columna = estado_juego['fantasma']['columna']
-    fantasma.direccion = estado_juego['fantasma']['direccion']
+    doc = db.collection('juego').document('estado').get()
+    if doc.exists:
+        estado_juego = doc.to_dict()
+        pacman.fila = estado_juego['pacman']['fila']
+        pacman.columna = estado_juego['pacman']['columna']
+        pacman.direccion = estado_juego['pacman']['direccion']
+        fantasma.fila = estado_juego['fantasma']['fila']
+        fantasma.columna = estado_juego['fantasma']['columna']
+        fantasma.direccion = estado_juego['fantasma']['direccion']
 
 def main():
     global puntos_casilla, ultimo_decremento, puntaje

@@ -3,8 +3,13 @@ import os
 import random
 import math
 from moviepy import VideoFileClip 
-from main import seleccionar_mapa
+from main import seleccionar_mapa, user_email
 from pyparsing import col
+import firebase_admin
+from firebase_admin import credentials, firestore
+from firebase_config import initialize_firebase
+initialize_firebase()
+db = firestore.client()
 
 pygame.init()
 
@@ -300,7 +305,7 @@ class Fantasmas:
 
         # para el fantasmas azul que su movimiento es aleatorio
         if self.aleatorio and not self.muerto:
-            objetivo_fila,objetivo_col = random.choice(opciones_validas)
+            self.target = random.choice(opciones_validas)
 
         # en la fila 10 se tepea de la ultima columna a la primera y viceversa
         if self.fila == 10:
@@ -365,6 +370,7 @@ def mostrar_game_over():
     # Espera un poco después de que el video termine
     pygame.time.wait(500)
     
+    actualizar_puntaje_en_firebase(puntaje, user_email)  # Use user_email from main.py
     seleccionar_mapa()
 
 def mostrar_victoria():
@@ -390,6 +396,7 @@ def mostrar_victoria():
     # Espera un poco después de que el video termine
     pygame.time.wait(500)
     
+    actualizar_puntaje_en_firebase(puntaje, user_email)  # Use user_email from main.py
     seleccionar_mapa()
 
 #clase para pacman 
@@ -481,10 +488,25 @@ def dibujar_margen():
     ventana.blit(imagen_margen, (ANCHO - MARGEN, 0))
     ventana.blit(imagen_margen, (ANCHO - MARGEN, ALTO // 2))
 
+def actualizar_puntaje_en_firebase(puntaje, email):
+    try:
+        ref = db.collection('users').where('email', '==', email).stream()
+        for user in ref:
+            user_id = user.id
+            user_data = user.to_dict()
+            if puntaje > user_data.get('score', 0):
+                db.collection('users').document(user_id).update({'score': puntaje})
+                print(f"Puntaje actualizado en Firebase para {email}: {puntaje}")
+            else:
+                print(f"El puntaje actual ({user_data.get('score', 0)}) es mayor o igual al nuevo puntaje ({puntaje}).")
+    except Exception as e:
+        print(f"Error al actualizar el puntaje en Firebase: {e}")
+
 def main():
     global puntos_casilla, ultimo_decremento, puntaje
     puntos_casilla = [(fila, col) for fila in range(len(mapa)) for col in range(len(mapa[0])) if mapa[fila][col] == 0 and (fila, col) not in excepciones_circulos]
     
+    email = user_email  
     run = True
     while run:
         ventana.fill(NEGRO)
@@ -516,12 +538,14 @@ def main():
             ultimo_decremento = pygame.time.get_ticks()
             
         if not puntos_casilla:
+            actualizar_puntaje_en_firebase(puntaje, email)
             print("pasaste de nivel")
             mostrar_victoria()  # Mostrar el video de victoria
             run = False
         pygame.display.update()
         clock.tick(fps)
     pygame.quit()
+    actualizar_puntaje_en_firebase(puntaje, email)
 
 if __name__ == "__main__":
     main()

@@ -1,18 +1,16 @@
 import pygame
 import firebase_admin
-from firebase_admin import credentials, db
+from firebase_admin import credentials, firestore
 import firebase_admin.auth as auth
 from moviepy import VideoFileClip  # Para reproducir el video
 import constantes  # Importar constantes desde el otro archivo
 import subprocess
+from firebase_config import initialize_firebase
 
 pygame.init()  # Iniciar pygame
 
 # Inicializar Firebase
-cred = credentials.Certificate(r"testpython-673c0-firebase-adminsdk-fbsvc-cfdb9b6a07.json")  #tienen que descargar la llave en firebase, cada que se hace un commit dejarla en el gitignore
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://testpython-673c0-default-rtdb.firebaseio.com/'
-})
+db = initialize_firebase()
 
 vent = pygame.display.set_mode((constantes.WIDTH, constantes.HEIGHT))
 pygame.display.set_caption("Pac-man")
@@ -20,6 +18,9 @@ pygame.display.set_caption("Pac-man")
 # Botones
 boton_start = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 - 50, 200, 50)
 boton_exit = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 + 50, 200, 50)
+
+# Global variable to store the user's email
+user_email = None
 
 # Funciones auxiliares
 def color_bot(button_rect):
@@ -68,15 +69,9 @@ def play_intro_video(video_path):
 
 def obtener_puntajes():
     try:
-        ref = db.reference('users')
-        usuarios = ref.get()
-        if usuarios:
-            print("Usuarios obtenidos de Firebase:")
-            for usuario_id, usuario_data in usuarios.items():
-                print(f"ID: {usuario_id}, Nombre: {usuario_data.get('display_name')}, Puntuación: {usuario_data.get('score')}")
-        else:
-            print("No se encontraron usuarios en la base de datos.")
-        puntajes = [(usuario_data.get('display_name', 'Desconocido'), usuario_data.get('score', 0)) for usuario_data in usuarios.values()]
+        ref = db.collection('users')
+        usuarios = ref.stream()
+        puntajes = [(usuario.get('display_name', 'Desconocido'), usuario.get('score', 0)) for usuario in usuarios]
         puntajes.sort(key=lambda x: x[1], reverse=True)
         return puntajes
     except Exception as e:
@@ -202,31 +197,33 @@ def login():
     show_register_button = False
     requesting_name = False
 
+    email_label = font.render("Email:", True, (255, 255, 255))  # Define email_label here
+
     def authenticate_user(email, password):
         nonlocal error_message, show_register_button
-        ref = db.reference("users").get()
-        if ref:
-            for user_id, user_data in ref.items():
-                if user_data.get("email") == email:
-                    if user_data.get("password") == password:
-                        error_message = "✅ Sign in successful!"
-                        show_register_button = False
-                        pygame.time.delay(1000)
-                        menu_principal()
-                        return True
-                    else:
-                        error_message = "❌ Incorrect password."
-                        return False
-        error_message = "❌ Email not found in database."
-        show_register_button = True
-        return False
+        try:
+            ref = db.collection('users').where('email', '==', email).stream()
+            for user in ref:
+                user_data = user.to_dict()
+                if user_data.get("password") == password:
+                    error_message = "✅ Sign in successful!"
+                    show_register_button = False
+                    pygame.time.delay(1000)
+                    menu_principal(email)
+                    return True
+                else:
+                    error_message = "❌ Incorrect password."
+                    return False
+            error_message = "❌ Email not found in database."
+            show_register_button = True
+            return False
+        except Exception as e:
+            error_message = f"❌ Error: {e}"
+            return False
 
     running = True
     while running:
         screen.fill((0, 0, 0))
-        title = font.render("Inicio de Sesión", True, (255, 255, 255))
-        screen.blit(title, (300, 50))
-        email_label = font.render("Email:", True, (255, 255, 255))
         password_label = font.render("Password:", True, (255, 255, 255))
         screen.blit(email_label, (200, 150))
         screen.blit(password_label, (200, 250))
@@ -302,9 +299,8 @@ def register():
     def register_user(email, password, name):
         nonlocal error_message
         try:
-            ref = db.reference("users")
-            new_user_ref = ref.push()
-            new_user_ref.set({
+            ref = db.collection("users")
+            ref.add({
                 "email": email,
                 "password": password,
                 "display_name": name,
@@ -312,7 +308,7 @@ def register():
             })
             error_message = "✅ Sign up successful!"
             pygame.time.delay(1000)
-            menu_principal()
+            menu_principal(email)
             return True
         except Exception as e:
             error_message = f"❌ Error: {e}"
@@ -391,7 +387,28 @@ def register():
         pygame.display.flip()
     pygame.quit()
 
-def menu_principal():
+def actualizar_puntaje(email, nuevo_puntaje):
+    try:
+        ref = db.collection('users').where('email', '==', email).stream()
+        for user in ref:
+            user_id = user.id
+            user_data = user.to_dict()
+            if nuevo_puntaje > user_data.get('score', 0):
+                db.collection('users').document(user_id).update({'score': nuevo_puntaje})
+                print("Puntaje actualizado en Firebase.")
+            else:
+                print("El nuevo puntaje no es mayor que el puntaje actual.")
+    except Exception as e:
+        print(f"Error al actualizar el puntaje en Firebase: {e}")
+
+def juego_terminado(email, puntaje):
+    actualizar_puntaje(email, puntaje)
+    # Aquí puedes agregar cualquier otra lógica que necesites cuando el juego termine
+    print("Juego terminado. Puntaje:", puntaje)
+
+def menu_principal(email):
+    global user_email
+    user_email = email
     fondo_imagen = pygame.image.load(r"assents/images/puck/P U C K.jpg")
     fondo_imagen = pygame.transform.scale(fondo_imagen, (constantes.WIDTH, constantes.HEIGHT))
     boton_play = pygame.Rect(constantes.WIDTH / 2 - 100, constantes.HEIGHT / 2 - 100, 200, 50)
